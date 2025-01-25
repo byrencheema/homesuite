@@ -3,13 +3,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, HomeLike } from "@/types/home";
+import { Home } from "@/types/home";
 import { HomeCard } from "@/components/HomeCard";
 import { Button } from "@/components/ui/button";
 import { ThumbsDown, ThumbsUp, MessageSquare } from "lucide-react";
+import { MatchPopup } from "@/components/MatchPopup";
 
 export function SwipeableHomes() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showMatch, setShowMatch] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -49,9 +53,18 @@ export function SwipeableHomes() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
-      setCurrentIndex((prev) => prev + 1);
+      if (variables.liked) {
+        setShowMatch(true);
+      }
+      setIsAnimating(true);
+      setSwipeDirection(variables.liked ? "right" : "left");
+      setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+        setIsAnimating(false);
+        setSwipeDirection(null);
+      }, 300);
       toast.success("Preference saved! Keep swiping to find your perfect home.");
     },
     onError: (error) => {
@@ -87,15 +100,25 @@ export function SwipeableHomes() {
   return (
     <div className="max-w-md mx-auto p-4">
       <div className="mb-6 relative">
-        <HomeCard home={currentHome} />
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute top-4 right-4 bg-white/90 hover:bg-white"
-          onClick={() => navigate(`/chat/${currentHome.id}`)}
+        <div
+          className={`transition-transform duration-300 ${
+            isAnimating
+              ? swipeDirection === "left"
+                ? "-translate-x-full rotate-[-20deg]"
+                : "translate-x-full rotate-[20deg]"
+              : ""
+          }`}
         >
-          <MessageSquare className="h-5 w-5" />
-        </Button>
+          <HomeCard home={currentHome} />
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute top-4 right-4 bg-white/90 hover:bg-white"
+            onClick={() => navigate(`/chat/${currentHome.id}`)}
+          >
+            <MessageSquare className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
       <div className="flex justify-center gap-4">
         <Button
@@ -114,6 +137,11 @@ export function SwipeableHomes() {
           <ThumbsUp className="w-6 h-6" />
         </Button>
       </div>
+      <MatchPopup
+        isOpen={showMatch}
+        onClose={() => setShowMatch(false)}
+        homeTitle={currentHome.title}
+      />
     </div>
   );
 }
