@@ -7,9 +7,8 @@ import { Session } from "@supabase/supabase-js";
 import Index from "@/pages/Index";
 import Browse from "@/pages/Browse";
 import Auth from "@/pages/Auth";
-import Chat from "@/pages/Chat";
+import Messages from "@/pages/Messages";
 import Settings from "@/pages/Settings";
-import Matches from "@/pages/Matches";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -49,9 +48,8 @@ function App() {
             path="/auth"
             element={session ? <Navigate to="/" replace /> : <Auth />}
           />
-          <Route path="/chat/:homeId" element={<Chat />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/matches" element={<Matches />} />
         </Routes>
         <Toaster position="top-right" />
       </Router>

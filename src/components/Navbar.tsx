@@ -1,13 +1,13 @@
-import { Home, LogIn, LogOut, Settings } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Home, LogIn, LogOut, Settings, MessageSquare, Search } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: session } = useQuery({
     queryKey: ["session"],
@@ -43,10 +43,36 @@ export const Navbar = () => {
             <>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
+                onClick={() => navigate("/browse")}
+                className={`flex items-center space-x-2 ${
+                  location.pathname === "/browse" ? "bg-primary/10" : ""
+                }`}
+              >
+                <Search className="h-5 w-5" />
+                <span className="hidden sm:inline">Browse</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/messages")}
+                className={`flex items-center space-x-2 ${
+                  location.pathname === "/messages" ? "bg-primary/10" : ""
+                }`}
+              >
+                <MessageSquare className="h-5 w-5" />
+                <span className="hidden sm:inline">Messages</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => navigate("/settings")}
+                className={`flex items-center space-x-2 ${
+                  location.pathname === "/settings" ? "bg-primary/10" : ""
+                }`}
               >
                 <Settings className="h-5 w-5" />
+                <span className="hidden sm:inline">Settings</span>
               </Button>
               <Button
                 variant="ghost"
@@ -55,7 +81,7 @@ export const Navbar = () => {
                 className="flex items-center space-x-2"
               >
                 <LogOut className="h-5 w-5" />
-                <span>Logout</span>
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </>
           ) : (
