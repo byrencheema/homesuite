@@ -7,7 +7,7 @@ export const Hero = () => {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: "url('/placeholder.svg')",
+          backgroundImage: "url('https://images.unsplash.com/photo-1721322800607-8c38375eef04')",
           filter: "brightness(0.7)",
         }}
       />
@@ -21,13 +21,22 @@ export const Hero = () => {
           HomeSuite makes house hunting as easy as finding your next date.
           Just swipe, match, and connect!
         </p>
-        <Button
-          size="lg"
-          className="bg-primary hover:bg-primary-hover text-white px-8 py-6 text-lg rounded-full transition-all duration-300 transform hover:scale-105"
-        >
-          Get Started
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
+        <div className="space-x-4">
+          <Button
+            size="lg"
+            className="bg-primary hover:bg-primary-hover text-white px-8 py-6 text-lg rounded-full transition-all duration-300 transform hover:scale-105"
+          >
+            Sign Up
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg rounded-full transition-all duration-300"
+          >
+            Log In
+          </Button>
+        </div>
       </div>
     </div>
   );

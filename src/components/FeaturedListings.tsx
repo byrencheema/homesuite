@@ -4,30 +4,33 @@ import { Badge } from "@/components/ui/badge";
 const listings = [
   {
     id: 1,
-    image: "/placeholder.svg",
+    image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04",
     title: "Modern Downtown Loft",
     price: "$599,000",
     location: "Downtown",
     beds: 2,
     baths: 2,
+    sqft: "1,200",
   },
   {
     id: 2,
-    image: "/placeholder.svg",
+    image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04",
     title: "Suburban Family Home",
     price: "$799,000",
     location: "Suburbs",
     beds: 4,
     baths: 3,
+    sqft: "2,500",
   },
   {
     id: 3,
-    image: "/placeholder.svg",
+    image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04",
     title: "Luxury Penthouse",
     price: "$1,299,000",
     location: "Waterfront",
     beds: 3,
     baths: 3,
+    sqft: "2,000",
   },
 ];
 
@@ -58,6 +61,7 @@ export const FeaturedListings = () => {
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>{listing.beds} beds</span>
                   <span>{listing.baths} baths</span>
+                  <span>{listing.sqft} sq ft</span>
                 </div>
               </CardContent>
             </Card>

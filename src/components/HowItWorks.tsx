@@ -3,18 +3,18 @@ import { MoveRight, Heart, MessageSquare } from "lucide-react";
 const steps = [
   {
     icon: MoveRight,
-    title: "Swipe",
-    description: "Browse homes effortlessly with our intuitive swipe interface",
+    title: "Swipe Through Homes",
+    description: "Browse beautiful homes with our intuitive swipe interface. Like what you see? Swipe right!",
   },
   {
     icon: Heart,
-    title: "Match",
-    description: "Get matched with homes that perfectly fit your criteria",
+    title: "Get Matched",
+    description: "When you match with a home, you'll get instant access to detailed information and virtual tours.",
   },
   {
     icon: MessageSquare,
-    title: "Connect",
-    description: "Chat directly with property owners or agents",
+    title: "Chat & Connect",
+    description: "Ask questions about the property through our AI-powered chat system or connect with real estate agents.",
   },
 ];
 
