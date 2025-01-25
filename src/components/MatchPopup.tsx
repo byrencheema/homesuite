@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CheckCircle, Sparkles } from "lucide-react";
 
@@ -8,6 +9,16 @@ interface MatchPopupProps {
 }
 
 export function MatchPopup({ isOpen, onClose, homeTitle }: MatchPopupProps) {
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, onClose]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
