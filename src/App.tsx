@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
+import Chat from "@/pages/Chat";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -39,20 +40,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route
-            path="/"
-            element={<Index />}
-          />
+          <Route path="/" element={<Index />} />
           <Route
             path="/auth"
-            element={
-              session ? (
-                <Navigate to="/" replace />
-              ) : (
-                <Auth />
-              )
-            }
+            element={session ? <Navigate to="/" replace /> : <Auth />}
           />
+          <Route path="/chat/:homeId" element={<Chat />} />
         </Routes>
         <Toaster position="top-right" />
       </Router>

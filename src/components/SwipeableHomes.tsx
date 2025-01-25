@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Home, HomeLike } from "@/types/home";
 import { HomeCard } from "@/components/HomeCard";
 import { Button } from "@/components/ui/button";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { ThumbsDown, ThumbsUp, MessageSquare } from "lucide-react";
 
 export function SwipeableHomes() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
-  // Get the current user's session
   const { data: session } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
@@ -51,14 +52,13 @@ export function SwipeableHomes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
       setCurrentIndex((prev) => prev + 1);
-      toast.success(
-        "Preference saved! Keep swiping to find your perfect home."
-      );
+      toast.success("Preference saved! Keep swiping to find your perfect home.");
     },
     onError: (error) => {
       console.error("Error liking home:", error);
       if (error instanceof Error && error.message.includes("logged in")) {
         toast.error("Please log in to save your preferences");
+        navigate("/auth");
       } else {
         toast.error("Failed to save your preference");
       }
@@ -68,7 +68,11 @@ export function SwipeableHomes() {
   const currentHome = homes[currentIndex];
 
   if (isLoading) {
-    return <div>Loading homes...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse text-lg text-gray-500">Loading homes...</div>
+      </div>
+    );
   }
 
   if (!currentHome) {
@@ -82,22 +86,30 @@ export function SwipeableHomes() {
 
   return (
     <div className="max-w-md mx-auto p-4">
-      <div className="mb-6">
+      <div className="mb-6 relative">
         <HomeCard home={currentHome} />
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute top-4 right-4 bg-white/90 hover:bg-white"
+          onClick={() => navigate(`/chat/${currentHome.id}`)}
+        >
+          <MessageSquare className="h-5 w-5" />
+        </Button>
       </div>
       <div className="flex justify-center gap-4">
         <Button
           variant="outline"
           size="lg"
           onClick={() => handleLike({ homeId: currentHome.id, liked: false })}
-          className="w-24"
+          className="w-24 h-16"
         >
           <ThumbsDown className="w-6 h-6" />
         </Button>
         <Button
           size="lg"
           onClick={() => handleLike({ homeId: currentHome.id, liked: true })}
-          className="w-24"
+          className="w-24 h-16 bg-primary hover:bg-primary-hover"
         >
           <ThumbsUp className="w-6 h-6" />
         </Button>
