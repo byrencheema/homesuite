@@ -3,15 +3,33 @@ import { ArrowRight, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { Session } from "@supabase/supabase-js";
 
 export const Hero = () => {
   const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       toast.success("Logged out successfully");
+      navigate("/auth");
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -37,23 +55,26 @@ export const Hero = () => {
           Just swipe, match, and connect!
         </p>
         <div className="space-x-4">
-          <Button
-            size="lg"
-            className="bg-primary hover:bg-primary-hover text-white px-8 py-6 text-lg rounded-full transition-all duration-300 transform hover:scale-105"
-            onClick={() => navigate("/auth")}
-          >
-            Get Started
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg rounded-full transition-all duration-300"
-            onClick={handleLogout}
-          >
-            Log Out
-            <LogOut className="ml-2 h-5 w-5" />
-          </Button>
+          {session ? (
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg rounded-full transition-all duration-300"
+              onClick={handleLogout}
+            >
+              Log Out
+              <LogOut className="ml-2 h-5 w-5" />
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              className="bg-primary hover:bg-primary-hover text-white px-8 py-6 text-lg rounded-full transition-all duration-300 transform hover:scale-105"
+              onClick={() => navigate("/auth")}
+            >
+              Get Started
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
