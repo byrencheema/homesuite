@@ -11,15 +11,7 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { MatchesSidebar } from "@/components/chat/MatchesSidebar";
 import { Progress } from "@/components/ui/progress";
-
-interface Message {
-  id: string;
-  content: string;
-  created_at: string;
-  is_ai: boolean;
-  user_id: string;
-  home_id: string;
-}
+import { Message } from "@/types/message";
 
 export default function Messages() {
   const [selectedHome, setSelectedHome] = useState<Home | null>(null);
@@ -91,6 +83,11 @@ export default function Messages() {
 
       if (userMessageError) throw userMessageError;
 
+      // Optimistically update the messages list with user's message
+      queryClient.setQueryData(["messages", selectedHome.id], (oldData: Message[] = []) => {
+        return [...oldData, userMessage];
+      });
+
       // Get AI response
       const response = await supabase.functions.invoke('chat-with-home', {
         body: { message: content, homeId: selectedHome.id }
@@ -120,6 +117,8 @@ export default function Messages() {
         description: error.message,
         variant: "destructive",
       });
+      // Invalidate to revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ["messages", selectedHome?.id] });
     },
   });
 
@@ -167,7 +166,11 @@ export default function Messages() {
                         <MessageBubble key={message.id} message={message} />
                       ))}
                       {sendMessage.isPending && (
-                        <Progress value={undefined} className="animate-pulse" />
+                        <div className="flex justify-start">
+                          <div className="max-w-[70%] rounded-lg px-4 py-2 bg-muted">
+                            <Progress value={undefined} className="w-12 h-2" />
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}
