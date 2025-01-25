@@ -13,7 +13,7 @@ import Settings from "@/pages/Settings";
 // Create a client
 const queryClient = new QueryClient();
 
-function App() {
+const AppContent = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -39,20 +39,26 @@ function App() {
   }
 
   return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/browse" element={<Browse />} />
+        <Route
+          path="/auth"
+          element={session ? <Navigate to="/" replace /> : <Auth />}
+        />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+      <Toaster position="top-right" />
+    </Router>
+  );
+};
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/browse" element={<Browse />} />
-          <Route
-            path="/auth"
-            element={session ? <Navigate to="/" replace /> : <Auth />}
-          />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-        <Toaster position="top-right" />
-      </Router>
+      <AppContent />
     </QueryClientProvider>
   );
 }
