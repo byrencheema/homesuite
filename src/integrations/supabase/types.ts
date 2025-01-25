@@ -95,6 +95,41 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          home_id: string
+          id: string
+          is_ai: boolean
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          home_id: string
+          id?: string
+          is_ai?: boolean
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          home_id?: string
+          id?: string
+          is_ai?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Home } from "@/types/home";
 import { Navbar } from "@/components/Navbar";
@@ -9,17 +9,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
   id: string;
   content: string;
   created_at: string;
+  is_ai: boolean;
   sender_id: string;
 }
 
 export default function Messages() {
   const [selectedHome, setSelectedHome] = useState<Home | null>(null);
   const [messageInput, setMessageInput] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: session } = useQuery({
     queryKey: ["session"],
@@ -50,24 +54,81 @@ export default function Messages() {
     enabled: !!session?.user?.id,
   });
 
-  // Placeholder for messages - you'll need to implement the actual messages table
-  const { data: messages = [] } = useQuery({
+  const { data: messages = [], isLoading: isLoadingMessages } = useQuery({
     queryKey: ["messages", selectedHome?.id],
     queryFn: async () => {
-      return [] as Message[];
+      if (!session?.user?.id || !selectedHome?.id) return [];
+
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("home_id", selectedHome.id)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      return data as Message[];
     },
-    enabled: !!selectedHome,
+    enabled: !!session?.user?.id && !!selectedHome?.id,
+  });
+
+  const sendMessage = useMutation({
+    mutationFn: async (content: string) => {
+      if (!session?.user?.id || !selectedHome?.id) throw new Error("Not authenticated or no home selected");
+
+      // Insert user message
+      const { data: userMessage, error: userMessageError } = await supabase
+        .from("messages")
+        .insert({
+          content,
+          user_id: session.user.id,
+          home_id: selectedHome.id,
+          is_ai: false,
+        })
+        .select()
+        .single();
+
+      if (userMessageError) throw userMessageError;
+
+      // Get AI response
+      const response = await supabase.functions.invoke('chat-with-home', {
+        body: { message: content, homeId: selectedHome.id }
+      });
+
+      if (response.error) throw response.error;
+
+      // Insert AI response
+      const { error: aiMessageError } = await supabase
+        .from("messages")
+        .insert({
+          content: response.data.reply,
+          user_id: session.user.id,
+          home_id: selectedHome.id,
+          is_ai: true,
+        });
+
+      if (aiMessageError) throw aiMessageError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages", selectedHome?.id] });
+      setMessageInput("");
+    },
+    onError: (error) => {
+      toast({
+        title: "Error sending message",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   if (!session) {
     return <Navigate to="/auth" replace />;
   }
 
-  const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedHome) return;
-    
-    // TODO: Implement message sending functionality
-    setMessageInput("");
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageInput.trim()) return;
+    sendMessage.mutate(messageInput);
   };
 
   return (
@@ -142,7 +203,11 @@ export default function Messages() {
 
                 {/* Messages */}
                 <ScrollArea className="flex-1 p-4">
-                  {messages.length === 0 ? (
+                  {isLoadingMessages ? (
+                    <div className="h-full flex items-center justify-center text-gray-500">
+                      Loading messages...
+                    </div>
+                  ) : messages.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-gray-500">
                       No messages yet. Start the conversation!
                     </div>
@@ -152,16 +217,16 @@ export default function Messages() {
                         <div
                           key={message.id}
                           className={`flex ${
-                            message.sender_id === session.user.id
+                            !message.is_ai
                               ? "justify-end"
                               : "justify-start"
                           }`}
                         >
                           <div
                             className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                              message.sender_id === session.user.id
-                                ? "bg-primary text-white"
-                                : "bg-gray-100"
+                              !message.is_ai
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
                             }`}
                           >
                             {message.content}
@@ -175,10 +240,7 @@ export default function Messages() {
                 {/* Message Input */}
                 <div className="p-4 border-t border-gray-200">
                   <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }}
+                    onSubmit={handleSendMessage}
                     className="flex space-x-2"
                   >
                     <Input
@@ -186,8 +248,9 @@ export default function Messages() {
                       onChange={(e) => setMessageInput(e.target.value)}
                       placeholder="Type a message..."
                       className="flex-1"
+                      disabled={sendMessage.isPending}
                     />
-                    <Button type="submit" size="icon">
+                    <Button type="submit" size="icon" disabled={sendMessage.isPending}>
                       <Send className="h-4 w-4" />
                     </Button>
                   </form>

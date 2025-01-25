@@ -1,1 +1,4 @@
 project_id = "kkgtnejqroqngtwecncs"
+
+[functions.chat-with-home]
+verify_jwt = true
