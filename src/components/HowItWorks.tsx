@@ -1,8 +1,8 @@
-import { Swipe, Heart, MessageSquare } from "lucide-react";
+import { MoveRight, Heart, MessageSquare } from "lucide-react";
 
 const steps = [
   {
-    icon: Swipe,
+    icon: MoveRight,
     title: "Swipe",
     description: "Browse homes effortlessly with our intuitive swipe interface",
   },
