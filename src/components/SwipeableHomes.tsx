@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Home } from "@/types/home";
 import { HomeCard } from "@/components/HomeCard";
 import { Button } from "@/components/ui/button";
-import { ThumbsDown, ThumbsUp, MessageSquare } from "lucide-react";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { MatchPopup } from "@/components/MatchPopup";
 
 export function SwipeableHomes() {
@@ -45,13 +45,35 @@ export function SwipeableHomes() {
         throw new Error("You must be logged in to like homes");
       }
 
-      const { error } = await supabase.from("home_likes").insert({
-        home_id: homeId,
-        user_id: session.user.id,
-        liked,
-      });
+      // First, check if a like already exists
+      const { data: existingLike } = await supabase
+        .from("home_likes")
+        .select("*")
+        .eq("home_id", homeId)
+        .eq("user_id", session.user.id)
+        .single();
 
-      if (error) throw error;
+      if (existingLike) {
+        // If it exists, update it
+        const { error } = await supabase
+          .from("home_likes")
+          .update({ liked })
+          .eq("home_id", homeId)
+          .eq("user_id", session.user.id);
+
+        if (error) throw error;
+      } else {
+        // If it doesn't exist, insert it
+        const { error } = await supabase
+          .from("home_likes")
+          .insert({
+            home_id: homeId,
+            user_id: session.user.id,
+            liked,
+          });
+
+        if (error) throw error;
+      }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
@@ -110,14 +132,6 @@ export function SwipeableHomes() {
           }`}
         >
           <HomeCard home={currentHome} />
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute top-4 right-4 bg-white/90 hover:bg-white"
-            onClick={() => navigate(`/chat/${currentHome.id}`)}
-          >
-            <MessageSquare className="h-5 w-5" />
-          </Button>
         </div>
       </div>
       <div className="flex justify-center gap-4">
