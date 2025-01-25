@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import Index from "@/pages/Index";
+import Browse from "@/pages/Browse";
 import Auth from "@/pages/Auth";
 import Chat from "@/pages/Chat";
+import Settings from "@/pages/Settings";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -41,11 +43,13 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/browse" element={<Browse />} />
           <Route
             path="/auth"
             element={session ? <Navigate to="/" replace /> : <Auth />}
           />
           <Route path="/chat/:homeId" element={<Chat />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
         <Toaster position="top-right" />
       </Router>
