@@ -12,6 +12,14 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [cooldownActive, setCooldownActive] = useState(false);
+
+  const startCooldown = () => {
+    setCooldownActive(true);
+    setTimeout(() => {
+      setCooldownActive(false);
+    }, 13000); // 13 seconds cooldown
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +36,17 @@ const Auth = () => {
             },
           },
         });
-        if (error) throw error;
+        
+        if (error) {
+          if (error.message.includes('rate_limit')) {
+            startCooldown();
+            toast.error("Please wait 13 seconds before trying again");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
+        
         toast.success("Check your email to confirm your account!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -105,12 +123,14 @@ const Auth = () => {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || (isSignUp && cooldownActive)}
             >
               {isLoading
                 ? "Loading..."
                 : isSignUp
-                ? "Sign up"
+                ? cooldownActive 
+                  ? "Please wait..."
+                  : "Sign up"
                 : "Sign in"}
             </Button>
           </div>
