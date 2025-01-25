@@ -9,6 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      home_likes: {
+        Row: {
+          created_at: string
+          home_id: string
+          id: string
+          liked: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          home_id: string
+          id?: string
+          liked: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          home_id?: string
+          id?: string
+          liked?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_likes_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homes: {
+        Row: {
+          additional_image_urls: string[] | null
+          address: string
+          bathrooms: number
+          bedrooms: number
+          city: string
+          created_at: string
+          description: string | null
+          id: string
+          main_image_url: string
+          price: number
+          square_feet: number
+          state: string
+          title: string
+          updated_at: string
+          zip_code: string
+        }
+        Insert: {
+          additional_image_urls?: string[] | null
+          address: string
+          bathrooms: number
+          bedrooms: number
+          city: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          main_image_url: string
+          price: number
+          square_feet: number
+          state: string
+          title: string
+          updated_at?: string
+          zip_code: string
+        }
+        Update: {
+          additional_image_urls?: string[] | null
+          address?: string
+          bathrooms?: number
+          bedrooms?: number
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          main_image_url?: string
+          price?: number
+          square_feet?: number
+          state?: string
+          title?: string
+          updated_at?: string
+          zip_code?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
