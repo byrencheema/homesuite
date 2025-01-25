@@ -16,7 +16,8 @@ interface Message {
   content: string;
   created_at: string;
   is_ai: boolean;
-  sender_id: string;
+  user_id: string;
+  home_id: string;
 }
 
 export default function Messages() {
