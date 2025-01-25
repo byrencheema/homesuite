@@ -18,11 +18,33 @@ const Auth = () => {
     setCooldownActive(true);
     setTimeout(() => {
       setCooldownActive(false);
-    }, 13000); // 13 seconds cooldown
+    }, 13000);
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
   };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email format
+    if (!validateEmail(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    // Validate password length
+    if (!validatePassword(password)) {
+      toast.error("Password should be at least 6 characters long");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -41,6 +63,10 @@ const Auth = () => {
           if (error.message.includes('rate_limit')) {
             startCooldown();
             toast.error("Please wait 13 seconds before trying again");
+          } else if (error.message.includes('email_address_invalid')) {
+            toast.error("Please enter a valid email address");
+          } else if (error.message.includes('weak_password')) {
+            toast.error("Password should be at least 6 characters long");
           } else {
             toast.error(error.message);
           }
@@ -53,7 +79,16 @@ const Auth = () => {
           email,
           password,
         });
-        if (error) throw error;
+        
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error("Invalid email or password");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
+        
         toast.success("Logged in successfully!");
         navigate("/");
       }
