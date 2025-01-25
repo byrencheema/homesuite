@@ -11,6 +11,16 @@ export function SwipeableHomes() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const queryClient = useQueryClient();
 
+  // Get the current user's session
+  const { data: session } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return session;
+    },
+  });
+
   const { data: homes = [], isLoading } = useQuery({
     queryKey: ["homes"],
     queryFn: async () => {
@@ -26,8 +36,13 @@ export function SwipeableHomes() {
 
   const { mutate: handleLike } = useMutation({
     mutationFn: async ({ homeId, liked }: { homeId: string; liked: boolean }) => {
+      if (!session?.user?.id) {
+        throw new Error("You must be logged in to like homes");
+      }
+
       const { error } = await supabase.from("home_likes").insert({
         home_id: homeId,
+        user_id: session.user.id,
         liked,
       });
 
@@ -36,10 +51,17 @@ export function SwipeableHomes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
       setCurrentIndex((prev) => prev + 1);
+      toast.success(
+        "Preference saved! Keep swiping to find your perfect home."
+      );
     },
     onError: (error) => {
       console.error("Error liking home:", error);
-      toast.error("Failed to save your preference");
+      if (error instanceof Error && error.message.includes("logged in")) {
+        toast.error("Please log in to save your preferences");
+      } else {
+        toast.error("Failed to save your preference");
+      }
     },
   });
 
