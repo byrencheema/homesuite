@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Filter, MapPin } from "lucide-react";
 import { RadiusMap } from "@/components/RadiusMap";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -31,8 +32,12 @@ const Browse = () => {
             location
           )}.json?access_token=pk.eyJ1IjoiYnNjaGVlbWEiLCJhIjoiY202ZHI3eWltMHo4bTJscHl3dWg5bm84MyJ9.9uHYl6mn0fgAFrAx-vetAg`
         );
+
+        if (!response.ok) {
+          throw new Error('Failed to geocode location');
+        }
+
         const data = await response.json();
-        
         console.log('Geocoding response:', data);
 
         if (data.features && data.features.length > 0) {
@@ -40,10 +45,16 @@ const Browse = () => {
           console.log('Found coordinates:', { lng, lat });
           setCoordinates([lng, lat]);
           setIsSearching(true);
+        } else {
+          toast.error('Location not found');
         }
       } catch (error) {
         console.error("Error geocoding location:", error);
+        toast.error("Failed to find location");
+        setIsSearching(false);
       }
+    } else {
+      toast.error("Please enter a location");
     }
   };
 
@@ -65,6 +76,11 @@ const Browse = () => {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="pl-10"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
               />
             </div>
             
