@@ -2,3 +2,6 @@ project_id = "kkgtnejqroqngtwecncs"
 
 [functions.chat-with-home]
 verify_jwt = true
+
+[functions.get-openai-token]
+verify_jwt = true
