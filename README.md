@@ -1,52 +1,84 @@
 # HomeSuite
 
-A modern real estate browsing application with gesture controls and location-based search.
+A modern real estate browsing application with gesture controls and location-based search. HomeSuite allows users to discover properties through an intuitive swipe interface and interact with AI-powered chat features.
 
-## Production Setup Guide
+## Features
 
-### Prerequisites
+- 🏠 Property browsing with swipe gestures
+- 📍 Location-based property search
+- 🤖 AI-powered property chat
+- 📱 Responsive design
+- 🎥 Gesture control support
+- 🗺️ Interactive map visualization
+
+## Tech Stack
+
+- React + TypeScript
+- Supabase for backend and authentication
+- Mapbox for geocoding and maps
+- OpenAI for chat features
+- TailwindCSS + shadcn/ui for styling
+- FastAPI for gesture processing
+
+## Prerequisites
 
 - Node.js 16 or higher
 - Supabase account and project
 - Mapbox API key
+- OpenAI API key
 - Melissa API key for address validation
 
-### Environment Setup
+## Getting Started
+
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd homesuite
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Configure Supabase
+- Create a new Supabase project
+- Set up the following secrets in your Supabase dashboard:
+  - `OPENAI_API_KEY`
+  - `MELISSA_API_KEY`
+  - `MAPBOX_API_KEY`
+
+4. Start the development server
+```bash
+npm run dev
+```
+
+## Environment Setup
 
 The application uses Supabase for secret management. Required secrets:
 
-- OPENAI_API_KEY - For AI chat features
-- MELISSA_API_KEY - For address validation
-- MAPBOX_API_KEY - For geocoding and maps
+- `OPENAI_API_KEY` - For AI chat features
+- `MELISSA_API_KEY` - For address validation
+- `MAPBOX_API_KEY` - For geocoding and maps
 
-These should be configured in your Supabase project's secret management.
-
-### Security Considerations
+## Security Features
 
 1. **Authentication**: 
-   - Email verification enabled by default
+   - Email verification enabled
    - JWT token-based session management
    - Secure password requirements
 
 2. **Database Security**:
-   - Row Level Security (RLS) policies enforced
-   - Input validation on all user inputs
-   - Prepared statements for database queries
+   - Row Level Security (RLS) policies
+   - Input validation
+   - Prepared statements
 
 3. **API Security**:
-   - Rate limiting on API endpoints
+   - Rate limiting
    - CORS configuration
    - Input sanitization
 
-### Error Handling
-
-The application implements:
-- Global error boundaries
-- Graceful degradation
-- Comprehensive error logging
-- User-friendly error messages
-
-### Performance Optimization
+## Performance Features
 
 1. **Frontend**:
    - Code splitting
@@ -59,14 +91,15 @@ The application implements:
    - Connection pooling
    - Edge function caching
 
-### Monitoring
+## Monitoring
 
+The application implements:
 - Console logging for development
 - Error tracking
 - Performance monitoring
 - User analytics
 
-### Deployment Checklist
+## Production Deployment
 
 1. Configure all required secrets in Supabase
 2. Enable required authentication providers
@@ -74,11 +107,14 @@ The application implements:
 4. Test all error scenarios
 5. Monitor initial deployment
 
-### Development Workflow
+## Contributing
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Configure Supabase project
-4. Start development server: `npm run dev`
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-For more details on specific features or configurations, refer to the documentation in the `docs` folder.
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
