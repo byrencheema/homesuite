@@ -8,7 +8,7 @@ interface MatchPopupProps {
   homeTitle: string;
 }
 
-export function MatchPopup({ isOpen, onClose, homeTitle }: MatchPopupProps) {
+export function MatchPopup({ isOpen, onClose }: MatchPopupProps) {
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
@@ -32,7 +32,7 @@ export function MatchPopup({ isOpen, onClose, homeTitle }: MatchPopupProps) {
             It&apos;s a Match!
           </h2>
           <p className="text-center text-muted-foreground animate-fade-up">
-            You liked {homeTitle}! Start a conversation to learn more.
+            Start a conversation to learn more about this home.
           </p>
         </div>
       </DialogContent>
