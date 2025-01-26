@@ -85,12 +85,14 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
       }
 
       // Check if user already liked/disliked this home
-      const { data: existingLike } = await supabase
+      const { data: existingLike, error: fetchError } = await supabase
         .from("home_likes")
         .select("*")
         .eq("home_id", homeId)
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
 
       if (existingLike) {
         const { error } = await supabase
