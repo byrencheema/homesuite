@@ -24,6 +24,7 @@ const Browse = () => {
   const handleSearch = async () => {
     if (location.trim()) {
       try {
+        console.log('Searching for location:', location);
         // Geocode the location using Mapbox
         const response = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
@@ -32,8 +33,11 @@ const Browse = () => {
         );
         const data = await response.json();
         
+        console.log('Geocoding response:', data);
+
         if (data.features && data.features.length > 0) {
           const [lng, lat] = data.features[0].center;
+          console.log('Found coordinates:', { lng, lat });
           setCoordinates([lng, lat]);
           setIsSearching(true);
         }
@@ -41,16 +45,6 @@ const Browse = () => {
         console.error("Error geocoding location:", error);
       }
     }
-  };
-
-  // Define radius steps
-  const radiusSteps = [5, 25, 100, 500];
-
-  // Find nearest step for slider
-  const getNearestStep = (value: number) => {
-    return radiusSteps.reduce((prev, curr) =>
-      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
-    );
   };
 
   return (
@@ -101,19 +95,17 @@ const Browse = () => {
                       </label>
                       <Slider
                         value={radius}
-                        onValueChange={(newValue) => {
-                          const nearestStep = getNearestStep(newValue[0]);
-                          setRadius([nearestStep]);
-                        }}
-                        min={5}
+                        onValueChange={setRadius}
+                        min={0}
                         max={500}
                         step={1}
                         className="w-full"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        {radiusSteps.map((step) => (
-                          <span key={step}>{step}mi</span>
-                        ))}
+                        <span>0mi</span>
+                        <span>100mi</span>
+                        <span>250mi</span>
+                        <span>500mi</span>
                       </div>
                     </div>
                   </div>
