@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect} from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -225,8 +225,34 @@ export function SwipeableHomes() {
   return (
     <div className="max-w-md mx-auto p-4">
       <div className="mb-6 relative">
+        <div
+          className={`transition-transform duration-300 ${
+            isAnimating
+              ? swipeDirection === "left"
+                ? "-translate-x-full rotate-[-20deg]"
+                : "translate-x-full rotate-[20deg]"
+              : ""
+          }`}
+        >
+          <HomeCard home={currentHome} />
+        </div>
         <HomeCard home={currentHome} />
       </div>
+      <div className="flex justify-center gap-4">
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={() => handleLike({ homeId: currentHome.id, liked: false })}
+          className="w-24 h-16"
+        >
+          <ThumbsDown className="w-6 h-6" />
+        </Button>
+        <Button
+          size="lg"
+          onClick={() => handleLike({ homeId: currentHome.id, liked: true })}
+          className="w-24 h-16 bg-primary hover:bg-primary-hover"
+        >
+          <ThumbsUp className="w-6 h-6" />
       <div className="flex flex-col items-center gap-4">
         <div className="flex justify-center gap-4">
           <Button
