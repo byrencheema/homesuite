@@ -21,17 +21,15 @@ export function HomeCard({ home }: HomeCardProps) {
     <Card className="w-full max-w-md mx-auto overflow-hidden">
       <div className="relative aspect-[4/3]">
         {allImages.length > 1 ? (
-          <Carousel className="w-full">
+          <Carousel className="w-full h-full">
             <CarouselContent>
               {allImages.map((imageUrl, index) => (
-                <CarouselItem key={index}>
-                  <div className="relative aspect-[4/3]">
-                    <img
-                      src={imageUrl}
-                      alt={`${home.title} - Image ${index + 1}`}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
+                <CarouselItem key={index} className="relative aspect-[4/3]">
+                  <img
+                    src={imageUrl}
+                    alt={`${home.title} - Image ${index + 1}`}
+                    className="object-cover w-full h-full"
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>

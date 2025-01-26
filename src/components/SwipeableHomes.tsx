@@ -115,8 +115,8 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
 
-      // Show match popup if "liked"
-      if (variables.liked) {
+      // Show match popup if "liked" and capture current home title
+      if (variables.liked && currentHome) {
         setShowMatch(true);
       }
 

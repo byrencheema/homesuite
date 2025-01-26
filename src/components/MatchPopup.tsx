@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle, Sparkles } from "lucide-react";
 
 interface MatchPopupProps {
@@ -13,7 +13,7 @@ export function MatchPopup({ isOpen, onClose, homeTitle }: MatchPopupProps) {
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 500); // Reduced to 0.5 seconds
+      }, 1500); // Increased to 1.5 seconds to ensure message is readable
 
       return () => clearTimeout(timer);
     }
@@ -22,6 +22,7 @@ export function MatchPopup({ isOpen, onClose, homeTitle }: MatchPopupProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
+        <DialogTitle className="sr-only">Match Confirmation</DialogTitle>
         <div className="flex flex-col items-center space-y-4 py-8">
           <div className="relative">
             <CheckCircle className="w-16 h-16 text-primary animate-scale-in" />
