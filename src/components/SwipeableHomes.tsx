@@ -8,6 +8,7 @@ import { HomeCard } from "@/components/HomeCard";
 import { Button } from "@/components/ui/button";
 import { ThumbsDown, ThumbsUp, Camera, CameraOff } from "lucide-react";
 import { MatchPopup } from "@/components/MatchPopup";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 
 interface SwipeableHomesProps {
   searchLocation?: string | null;
@@ -115,8 +116,11 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
 
-      // Show match popup if "liked" and capture current home title
-      if (variables.liked && currentHome) {
+      // Capture current home title before state updates
+      const matchedHomeTitle = currentHome?.title;
+
+      // Show match popup if "liked"
+      if (variables.liked && matchedHomeTitle) {
         setShowMatch(true);
       }
 
@@ -246,6 +250,9 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
     );
   }
 
+  const hasMultipleImages = currentHome.additional_image_urls && currentHome.additional_image_urls.length > 0;
+  const allImages = hasMultipleImages ? [currentHome.main_image_url, ...currentHome.additional_image_urls] : [currentHome.main_image_url];
+
   return (
     <div className="max-w-md mx-auto p-4">
       <div className="mb-6 relative">
@@ -259,7 +266,21 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
               : ""
           }`}
         >
-          <HomeCard home={currentHome} />
+          <Carousel className="w-full h-full">
+            <CarouselContent>
+              {allImages.map((imageUrl, index) => (
+                <CarouselItem key={index} className="relative aspect-[4/3]">
+                  <img
+                    src={imageUrl}
+                    alt={`${currentHome.title} - Image ${index + 1}`}
+                    className="object-cover w-full h-full"
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2" />
+            <CarouselNext className="right-2" />
+          </Carousel>
         </div>
       </div>
 
