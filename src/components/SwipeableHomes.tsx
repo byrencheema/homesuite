@@ -207,7 +207,7 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
           context?.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
           const imageData = canvas.toDataURL("image/jpeg");
           sendToServer(imageData);
-        }, 30);
+        }, 25);
 
         // Set up WebSocket
         const ws = new WebSocket("ws://localhost:8765");
