@@ -19,18 +19,20 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiYnNjaGVlbWEiLCJhIjoiY202ZHI3eWltMHo4bTJscHl3dWg5bm84MyJ9.9uHYl6mn0fgAFrAx-vetAg';
 
-    map.current = new mapboxgl.Map({
+    const initMap = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
       zoom: 9,
       center: center || [-122.4194, 37.7749], // Default to San Francisco
     });
 
-    map.current.on('load', () => {
+    map.current = initMap;
+
+    initMap.on('load', () => {
       setMapLoaded(true);
       
       // Add the radius circle source
-      map.current?.addSource('radius-circle', {
+      initMap.addSource('radius-circle', {
         type: 'geojson',
         data: {
           type: 'Feature',
@@ -43,7 +45,7 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
       });
 
       // Add a transparent fill layer
-      map.current?.addLayer({
+      initMap.addLayer({
         id: 'radius-circle-fill',
         type: 'fill',
         source: 'radius-circle',
@@ -54,7 +56,7 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
       });
 
       // Add a stroke layer
-      map.current?.addLayer({
+      initMap.addLayer({
         id: 'radius-circle-stroke',
         type: 'line',
         source: 'radius-circle',
@@ -66,7 +68,7 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
     });
 
     return () => {
-      map.current?.remove();
+      initMap.remove();
     };
   }, []);
 
@@ -76,21 +78,27 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
 
     const coordinates = center || [-122.4194, 37.7749];
     
-    // Create a circle using turf
-    const options = { steps: 64, units: 'miles' as const };
-    const circleGeojson = circle(coordinates, radiusMiles, options);
+    try {
+      // Create a circle using turf
+      const options = { steps: 64, units: 'miles' as const };
+      const circleGeojson = circle(coordinates, radiusMiles, options);
 
-    // Update the circle source
-    const source = map.current.getSource('radius-circle') as mapboxgl.GeoJSONSource;
-    source?.setData(circleGeojson);
+      // Update the circle source
+      const source = map.current.getSource('radius-circle') as mapboxgl.GeoJSONSource;
+      if (source) {
+        source.setData(circleGeojson);
+      }
 
-    // Center map on the location with appropriate zoom
-    if (center) {
-      map.current.flyTo({
-        center: center,
-        zoom: Math.max(9, 14 - Math.log2(radiusMiles)),
-        duration: 1000,
-      });
+      // Center map on the location with appropriate zoom
+      if (center) {
+        map.current.flyTo({
+          center: center,
+          zoom: Math.max(9, 14 - Math.log2(radiusMiles)),
+          duration: 1000,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating radius circle:', error);
     }
   }, [center, radiusMiles, mapLoaded]);
 
