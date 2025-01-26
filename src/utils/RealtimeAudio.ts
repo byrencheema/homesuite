@@ -65,6 +65,7 @@ export class RealtimeChat {
   private dc: RTCDataChannel | null = null;
   private audioEl: HTMLAudioElement;
   private recorder: AudioRecorder | null = null;
+  private isProcessingResponse = false;
 
   constructor(private onMessage: (message: any) => void) {
     this.audioEl = document.createElement("audio");
@@ -98,6 +99,11 @@ export class RealtimeChat {
       this.dc.addEventListener("message", (e) => {
         const event = JSON.parse(e.data);
         console.log("Received event:", event);
+        
+        if (event.type === 'response.audio.done') {
+          this.isProcessingResponse = false;
+        }
+        
         this.onMessage(event);
       });
 
@@ -127,7 +133,7 @@ export class RealtimeChat {
 
       // Start recording
       this.recorder = new AudioRecorder((audioData) => {
-        if (this.dc?.readyState === 'open') {
+        if (this.dc?.readyState === 'open' && !this.isProcessingResponse) {
           this.dc.send(JSON.stringify({
             type: 'input_audio_buffer.append',
             audio: this.encodeAudioData(audioData)
@@ -165,6 +171,13 @@ export class RealtimeChat {
     if (!this.dc || this.dc.readyState !== 'open') {
       throw new Error('Data channel not ready');
     }
+
+    if (this.isProcessingResponse) {
+      console.log('Still processing previous response, ignoring new message');
+      return;
+    }
+
+    this.isProcessingResponse = true;
 
     const event = {
       type: 'conversation.item.create',

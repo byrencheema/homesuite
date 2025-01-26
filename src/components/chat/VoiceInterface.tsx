@@ -15,6 +15,7 @@ interface VoiceInterfaceProps {
     square_feet: number;
     price: number;
     description: string;
+    main_image_url: string;
   } | null;
 }
 
@@ -45,6 +46,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ selectedHome }) => {
     }
 
     try {
+      // Ensure any existing connection is closed
+      if (chatRef.current) {
+        chatRef.current.disconnect();
+      }
+
       chatRef.current = new RealtimeChat(handleMessage);
       await chatRef.current.init();
       setIsConnected(true);
@@ -83,12 +89,20 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ selectedHome }) => {
           opacity: isSpeaking ? 0.8 : 1,
         }}
         transition={{ duration: 0.3 }}
-        className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-8"
+        className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-8 overflow-hidden"
       >
-        {isConnected ? (
-          <Mic className={`w-12 h-12 ${isSpeaking ? 'text-primary' : 'text-gray-400'}`} />
+        {selectedHome ? (
+          <img 
+            src={selectedHome.main_image_url} 
+            alt="Home"
+            className="w-full h-full object-cover"
+          />
         ) : (
-          <MicOff className="w-12 h-12 text-gray-400" />
+          isConnected ? (
+            <Mic className={`w-12 h-12 ${isSpeaking ? 'text-primary' : 'text-gray-400'}`} />
+          ) : (
+            <MicOff className="w-12 h-12 text-gray-400" />
+          )
         )}
       </motion.div>
 
