@@ -24,7 +24,6 @@ export const ChatContainer = ({
 }: ChatContainerProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -32,7 +31,7 @@ export const ChatContainer = ({
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[calc(100vh-12rem)] max-h-[calc(100vh-12rem)]">
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {isLoadingMessages ? (
@@ -65,12 +64,14 @@ export const ChatContainer = ({
         </div>
       </ScrollArea>
 
-      <ChatInput
-        value={messageInput}
-        onChange={setMessageInput}
-        onSubmit={handleSendMessage}
-        isLoading={isPendingSend}
-      />
+      <div className="p-4 border-t">
+        <ChatInput
+          value={messageInput}
+          onChange={setMessageInput}
+          onSubmit={handleSendMessage}
+          isLoading={isPendingSend}
+        />
+      </div>
     </div>
   );
 };
