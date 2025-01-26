@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { ChatContainer } from "@/components/chat/ChatContainer";
 import VoiceInterface from "@/components/chat/VoiceInterface";
-import { motion } from "framer-motion";
+import { useState } from "react";
 
 interface TabContentProps {
   selectedHome: Home;
@@ -25,14 +25,26 @@ export const TabContent = ({
   handleSendMessage,
   isPendingSend,
 }: TabContentProps) => {
+  const [activeTab, setActiveTab] = useState("chat");
+
   return (
-    <Tabs defaultValue="chat" className="flex-1 flex flex-col">
+    <Tabs 
+      value={activeTab} 
+      onValueChange={setActiveTab} 
+      className="flex-1 flex flex-col"
+    >
       <ChatHeader home={selectedHome}>
         <TabsList className="ml-4">
-          <TabsTrigger value="chat" className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white">
+          <TabsTrigger 
+            value="chat" 
+            className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
             Chat
           </TabsTrigger>
-          <TabsTrigger value="voice" className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white">
+          <TabsTrigger 
+            value="voice" 
+            className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
             Voice
           </TabsTrigger>
         </TabsList>
@@ -40,7 +52,7 @@ export const TabContent = ({
 
       <TabsContent 
         value="chat" 
-        className="flex-1 flex flex-col data-[state=inactive]:opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
+        className="flex-1 flex flex-col data-[state=inactive]:hidden"
       >
         <ChatContainer
           messages={messages}
@@ -54,7 +66,7 @@ export const TabContent = ({
 
       <TabsContent 
         value="voice" 
-        className="flex-1 data-[state=inactive]:opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
+        className="flex-1 data-[state=inactive]:hidden"
       >
         <div className="flex items-center justify-center h-full">
           <VoiceInterface selectedHome={selectedHome} />
