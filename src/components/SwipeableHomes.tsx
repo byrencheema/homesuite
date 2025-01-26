@@ -8,7 +8,6 @@ import { HomeCard } from "@/components/HomeCard";
 import { Button } from "@/components/ui/button";
 import { ThumbsDown, ThumbsUp, Camera, CameraOff } from "lucide-react";
 import { MatchPopup } from "@/components/MatchPopup";
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 
 interface SwipeableHomesProps {
   searchLocation?: string | null;
@@ -116,11 +115,8 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
 
-      // Capture current home title before state updates
-      const matchedHomeTitle = currentHome?.title;
-
-      // Show match popup if "liked"
-      if (variables.liked && matchedHomeTitle) {
+      // Show match popup if "liked" and capture current home title
+      if (variables.liked && currentHome) {
         setShowMatch(true);
       }
 
@@ -250,9 +246,6 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
     );
   }
 
-  const hasMultipleImages = currentHome.additional_image_urls && currentHome.additional_image_urls.length > 0;
-  const allImages = hasMultipleImages ? [currentHome.main_image_url, ...currentHome.additional_image_urls] : [currentHome.main_image_url];
-
   return (
     <div className="max-w-md mx-auto p-4">
       <div className="mb-6 relative">
@@ -266,38 +259,7 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
               : ""
           }`}
         >
-          <Carousel className="w-full h-full">
-            <CarouselContent>
-              {allImages.map((imageUrl, index) => (
-                <CarouselItem key={index} className="relative aspect-[4/3]">
-                  <img
-                    src={imageUrl}
-                    alt={`${currentHome.title} - Image ${index + 1}`}
-                    className="object-cover w-full h-full rounded-lg"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2" />
-            <CarouselNext className="right-2" />
-          </Carousel>
-
-          {/* Home details */}
-          <div className="mt-4 space-y-2">
-            <h2 className="text-2xl font-semibold">{currentHome.title}</h2>
-            <p className="text-muted-foreground">{currentHome.description}</p>
-            <div className="flex justify-between items-center">
-              <p className="text-xl font-bold">${currentHome.price.toLocaleString()}</p>
-              <div className="flex gap-4 text-muted-foreground">
-                <span>{currentHome.bedrooms} beds</span>
-                <span>{currentHome.bathrooms} baths</span>
-                <span>{currentHome.square_feet.toLocaleString()} sqft</span>
-              </div>
-            </div>
-            <p className="text-muted-foreground">
-              {currentHome.address}, {currentHome.city}, {currentHome.state} {currentHome.zip_code}
-            </p>
-          </div>
+          <HomeCard home={currentHome} />
         </div>
       </div>
 
