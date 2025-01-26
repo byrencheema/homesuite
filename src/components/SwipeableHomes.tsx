@@ -45,33 +45,61 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
     queryKey: ["homes", searchLocation, searchRadius],
     queryFn: async () => {
       if (searchLocation) {
-        // Use proximity search
-        const response = await fetch("https://kkgtnejqroqngtwecncs.functions.supabase.co/proximity-search", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            location: searchLocation,
-            radius: searchRadius,
-          }),
-        });
+        console.log('Initiating proximity search:', { location: searchLocation, radius: searchRadius });
+        
+        try {
+          // Validate input
+          if (!searchLocation.trim() || typeof searchRadius !== 'number') {
+            throw new Error('Invalid search parameters');
+          }
 
-        if (!response.ok) {
-          const error = await response.json();
-          toast.error(error.message || "Failed to search homes");
+          // Create a serializable request body
+          const requestBody = JSON.stringify({
+            location: searchLocation.trim(),
+            radius: Math.max(0, Math.min(500, searchRadius)) // Ensure radius is between 0 and 500
+          });
+
+          console.log('Sending proximity search request with body:', requestBody);
+
+          const response = await fetch("https://kkgtnejqroqngtwecncs.functions.supabase.co/proximity-search", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: requestBody
+          });
+
+          if (!response.ok) {
+            const errorData = await response.text();
+            console.error('Proximity search error response:', errorData);
+            throw new Error(`Failed to search homes: ${errorData}`);
+          }
+
+          const data = await response.json();
+          console.log('Proximity search response:', data);
+
+          if (!data.homes) {
+            throw new Error('Invalid response format');
+          }
+
+          return data.homes;
+        } catch (error) {
+          console.error('Proximity search error:', error);
+          toast.error(error instanceof Error ? error.message : 'Failed to search homes');
           return [];
         }
-
-        const { homes } = await response.json();
-        return homes;
       } else {
         // Regular fetch all homes
+        console.log('Fetching all homes');
         const { data, error } = await supabase
           .from("homes")
           .select("*")
           .order("created_at", { ascending: false });
-        if (error) throw error;
+          
+        if (error) {
+          console.error('Supabase query error:', error);
+          throw error;
+        }
         return data as Home[];
       }
     },
@@ -85,12 +113,14 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
       }
 
       // Check if user already liked/disliked this home
-      const { data: existingLike } = await supabase
+      const { data: existingLike, error: fetchError } = await supabase
         .from("home_likes")
         .select("*")
         .eq("home_id", homeId)
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
 
       if (existingLike) {
         const { error } = await supabase
@@ -113,8 +143,8 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["homes"] });
 
-      // Show match popup if "liked"
-      if (variables.liked) {
+      // Show match popup if "liked" and capture current home title
+      if (variables.liked && currentHome) {
         setShowMatch(true);
       }
 
@@ -247,7 +277,6 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
   return (
     <div className="max-w-md mx-auto p-4">
       <div className="mb-6 relative">
-        {/* The front HomeCard (animated on swipe) */}
         <div
           className={`transition-transform duration-300 ${
             isAnimating
@@ -262,7 +291,6 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
       </div>
 
       <div className="flex flex-col items-center gap-4">
-        {/* Like / Dislike buttons */}
         <div className="flex justify-center gap-4">
           <Button
             variant="outline"
@@ -281,7 +309,6 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
           </Button>
         </div>
 
-        {/* Enhanced webcam toggle button */}
         <Button
           onClick={handleWebcamStart}
           variant="secondary"

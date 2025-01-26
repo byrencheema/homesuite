@@ -15,7 +15,29 @@ serve(async (req) => {
   }
 
   try {
-    const { location, radius } = await req.json()
+    // Parse request body
+    const requestBody = await req.text()
+    console.log('Request body:', requestBody)
+
+    if (!requestBody) {
+      throw new Error('Request body is empty')
+    }
+
+    let body
+    try {
+      body = JSON.parse(requestBody)
+    } catch (e) {
+      console.error('Error parsing JSON:', e)
+      throw new Error('Invalid JSON in request body')
+    }
+
+    const { location, radius } = body
+    console.log('Parsed request:', { location, radius })
+
+    if (!location || radius === undefined) {
+      throw new Error('Missing required parameters: location and radius')
+    }
+
     const melissaApiKey = Deno.env.get('MELISSA_API_KEY')
     
     if (!melissaApiKey) {
@@ -55,8 +77,11 @@ serve(async (req) => {
     })
 
     if (error) {
+      console.error('Database error:', error)
       throw error
     }
+
+    console.log(`Found ${homes?.length || 0} homes within ${radius} miles`)
 
     return new Response(
       JSON.stringify({ homes }),
@@ -71,7 +96,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        details: error
+      }),
       { 
         status: 400,
         headers: { 

@@ -276,6 +276,10 @@ export type Database = {
         }
         Returns: number
       }
+      update_home_coordinates: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

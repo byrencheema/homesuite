@@ -4,7 +4,10 @@ import { Navbar } from "@/components/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Filter, MapPin, Camera } from "lucide-react";
+import { Filter, MapPin, Loader2 } from "lucide-react";
+import { RadiusMap } from "@/components/RadiusMap";
+import { toast } from "sonner";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   Sheet,
   SheetContent,
@@ -16,19 +19,52 @@ import {
 
 const Browse = () => {
   const [location, setLocation] = useState("");
-  const [radius, setRadius] = useState([10]); // Default 10 mile radius
+  const [radius, setRadius] = useState([25]); // Default 25 mile radius
   const [isSearching, setIsSearching] = useState(false);
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = () => {
-    if (location.trim()) {
-      setIsSearching(true);
-    }
+  const validateLocation = (input: string): boolean => {
+    return input.trim().length >= 3; // Basic validation
   };
 
-  const handleGestureControl = () => {
-    const webcamButton = document.querySelector('[data-webcam-button]') as HTMLButtonElement | null;
-    if (webcamButton) {
-      webcamButton.click();
+  const handleSearch = async () => {
+    if (!validateLocation(location)) {
+      toast.error("Please enter a valid location (minimum 3 characters)");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      console.log('Searching for location:', location);
+      // Geocode the location using Mapbox
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          location
+        )}.json?access_token=pk.eyJ1IjoiYnNjaGVlbWEiLCJhIjoiY202ZHI3eWltMHo4bTJscHl3dWg5bm84MyJ9.9uHYl6mn0fgAFrAx-vetAg`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to geocode location');
+      }
+
+      const data = await response.json();
+      console.log('Geocoding response:', data);
+
+      if (data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center;
+        console.log('Found coordinates:', { lng, lat });
+        setCoordinates([lng, lat]);
+        setIsSearching(true);
+      } else {
+        toast.error('Location not found');
+      }
+    } catch (error) {
+      console.error("Error geocoding location:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to find location");
+      setIsSearching(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -50,17 +86,21 @@ const Browse = () => {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="pl-10"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isLoading) {
+                    handleSearch();
+                  }
+                }}
               />
             </div>
             
-            {/* Filters Sheet */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" className="px-4">
                   <Filter className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent>
+              <SheetContent className="w-[400px] sm:w-[540px]">
                 <SheetHeader>
                   <SheetTitle>Search Filters</SheetTitle>
                   <SheetDescription>
@@ -68,45 +108,58 @@ const Browse = () => {
                   </SheetDescription>
                 </SheetHeader>
                 <div className="py-6">
-                  <div className="space-y-4">
-                    <label className="text-sm font-medium">
-                      Search radius: {radius[0]} miles
-                    </label>
-                    <Slider
-                      value={radius}
-                      onValueChange={setRadius}
-                      min={1}
-                      max={50}
-                      step={1}
-                      className="w-full"
+                  <div className="space-y-6">
+                    <RadiusMap 
+                      center={coordinates}
+                      radiusMiles={radius[0]}
                     />
+                    
+                    <div className="space-y-4">
+                      <label className="text-sm font-medium">
+                        Search radius: {radius[0]} miles
+                      </label>
+                      <Slider
+                        value={radius}
+                        onValueChange={setRadius}
+                        min={0}
+                        max={500}
+                        step={1}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>0mi</span>
+                        <span>100mi</span>
+                        <span>250mi</span>
+                        <span>500mi</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </SheetContent>
             </Sheet>
 
-            <Button onClick={handleSearch} className="bg-primary hover:bg-primary-hover">
-              Search
+            <Button 
+              onClick={handleSearch} 
+              className="bg-primary hover:bg-primary-hover"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Search'
+              )}
             </Button>
           </div>
         </div>
 
-        <div className="relative">
-          <SwipeableHomes 
-            searchLocation={isSearching ? location : null}
-            searchRadius={radius[0]}
-          />
-          
-          {/* Webcam Control Button */}
-          <Button
-            variant="secondary"
-            className="fixed bottom-8 right-8 shadow-lg hover:shadow-xl transition-all duration-300 gap-2"
-            onClick={handleGestureControl}
-          >
-            <Camera className="h-5 w-5" />
-            <span>Gesture Control</span>
-          </Button>
-        </div>
+        <ErrorBoundary>
+          <div className="relative">
+            <SwipeableHomes 
+              searchLocation={isSearching ? location : null}
+              searchRadius={radius[0]}
+            />
+          </div>
+        </ErrorBoundary>
       </div>
     </main>
   );
