@@ -46,7 +46,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ selectedHome }) => {
     }
 
     try {
-      // Ensure any existing connection is closed
       if (chatRef.current) {
         chatRef.current.disconnect();
       }
@@ -82,7 +81,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ selectedHome }) => {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center relative">
+    <div className="absolute inset-0 flex items-center justify-center">
       <AnimatePresence mode="wait">
         <motion.div
           key={isConnected ? 'connected' : 'disconnected'}

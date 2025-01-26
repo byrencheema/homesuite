@@ -3,17 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Home } from "@/types/home";
 import { Navbar } from "@/components/Navbar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { MessageBubble } from "@/components/chat/MessageBubble";
-import { ChatHeader } from "@/components/chat/ChatHeader";
-import { ChatInput } from "@/components/chat/ChatInput";
 import { MatchesSidebar } from "@/components/chat/MatchesSidebar";
-import { Progress } from "@/components/ui/progress";
-import { Message } from "@/types/message";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import VoiceInterface from "@/components/chat/VoiceInterface";
+import { TabContent } from "@/components/chat/TabContent";
 
 export default function Messages() {
   const [selectedHome, setSelectedHome] = useState<Home | null>(null);
@@ -62,7 +55,7 @@ export default function Messages() {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data as Message[];
+      return data;
     },
     enabled: !!session?.user?.id && !!selectedHome?.id,
   });
@@ -71,7 +64,6 @@ export default function Messages() {
     mutationFn: async (content: string) => {
       if (!session?.user?.id || !selectedHome?.id) throw new Error("Not authenticated or no home selected");
 
-      // Insert user message
       const { data: userMessage, error: userMessageError } = await supabase
         .from("messages")
         .insert({
@@ -85,19 +77,16 @@ export default function Messages() {
 
       if (userMessageError) throw userMessageError;
 
-      // Optimistically update the messages list with user's message
-      queryClient.setQueryData(["messages", selectedHome.id], (oldData: Message[] = []) => {
+      queryClient.setQueryData(["messages", selectedHome.id], (oldData: any = []) => {
         return [...oldData, userMessage];
       });
 
-      // Get AI response
       const response = await supabase.functions.invoke('chat-with-home', {
         body: { message: content, homeId: selectedHome.id }
       });
 
       if (response.error) throw response.error;
 
-      // Insert AI response
       const { error: aiMessageError } = await supabase
         .from("messages")
         .insert({
@@ -119,7 +108,6 @@ export default function Messages() {
         description: error.message,
         variant: "destructive",
       });
-      // Invalidate to revert optimistic update on error
       queryClient.invalidateQueries({ queryKey: ["messages", selectedHome?.id] });
     },
   });
@@ -148,64 +136,15 @@ export default function Messages() {
 
           <div className="flex-1 flex flex-col">
             {selectedHome ? (
-              <Tabs defaultValue="chat" className="flex-1 flex flex-col">
-                <ChatHeader home={selectedHome}>
-                  <TabsList className="ml-4">
-                    <TabsTrigger value="chat" className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white">
-                      Chat
-                    </TabsTrigger>
-                    <TabsTrigger value="voice" className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white">
-                      Voice
-                    </TabsTrigger>
-                  </TabsList>
-                </ChatHeader>
-
-                <TabsContent 
-                  value="chat" 
-                  className="flex-1 flex flex-col data-[state=inactive]:opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
-                >
-                  <ScrollArea className="flex-1 p-4">
-                    {isLoadingMessages ? (
-                      <div className="space-y-4">
-                        <Progress value={33} />
-                        <Progress value={66} />
-                        <Progress value={100} />
-                      </div>
-                    ) : messages.length === 0 ? (
-                      <div className="h-full flex items-center justify-center text-gray-500">
-                        No messages yet. Start the conversation!
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {messages.map((message) => (
-                          <MessageBubble key={message.id} message={message} />
-                        ))}
-                        {sendMessage.isPending && (
-                          <div className="flex justify-start">
-                            <div className="max-w-[70%] rounded-lg px-4 py-2 bg-muted">
-                              <Progress value={undefined} className="w-12 h-2" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </ScrollArea>
-
-                  <ChatInput
-                    value={messageInput}
-                    onChange={setMessageInput}
-                    onSubmit={handleSendMessage}
-                    isLoading={sendMessage.isPending}
-                  />
-                </TabsContent>
-
-                <TabsContent 
-                  value="voice" 
-                  className="flex-1 data-[state=inactive]:opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
-                >
-                  <VoiceInterface selectedHome={selectedHome} />
-                </TabsContent>
-              </Tabs>
+              <TabContent
+                selectedHome={selectedHome}
+                messages={messages}
+                isLoadingMessages={isLoadingMessages}
+                messageInput={messageInput}
+                setMessageInput={setMessageInput}
+                handleSendMessage={handleSendMessage}
+                isPendingSend={sendMessage.isPending}
+              />
             ) : (
               <div className="h-full flex items-center justify-center text-gray-500">
                 Select a home to start chatting
