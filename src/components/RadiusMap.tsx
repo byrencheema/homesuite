@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import * as turf from '@turf/helpers';
+import circle from '@turf/circle';
 
 interface RadiusMapProps {
   center: [number, number] | null;
@@ -10,7 +12,6 @@ interface RadiusMapProps {
 export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const radiusCircle = useRef<mapboxgl.GeoJSONSource | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
     map.current.on('load', () => {
       setMapLoaded(true);
       
-      // Add the radius circle source and layer
+      // Add the radius circle source
       map.current?.addSource('radius-circle', {
         type: 'geojson',
         data: {
@@ -41,25 +42,27 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
         },
       });
 
+      // Add a transparent fill layer
       map.current?.addLayer({
-        id: 'radius-circle',
-        type: 'circle',
+        id: 'radius-circle-fill',
+        type: 'fill',
         source: 'radius-circle',
         paint: {
-          'circle-radius': {
-            stops: [
-              [0, 0],
-              [20, radiusMiles * 50], // Adjust the multiplier to make the circle more visible
-            ],
-          },
-          'circle-color': '#008080',
-          'circle-opacity': 0.2,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#008080',
+          'fill-color': '#008080',
+          'fill-opacity': 0.2,
         },
       });
 
-      radiusCircle.current = map.current?.getSource('radius-circle') as mapboxgl.GeoJSONSource;
+      // Add a stroke layer
+      map.current?.addLayer({
+        id: 'radius-circle-stroke',
+        type: 'line',
+        source: 'radius-circle',
+        paint: {
+          'line-color': '#008080',
+          'line-width': 2,
+        },
+      });
     });
 
     return () => {
@@ -69,26 +72,19 @@ export function RadiusMap({ center, radiusMiles }: RadiusMapProps) {
 
   // Update circle when center or radius changes
   useEffect(() => {
-    if (!mapLoaded || !map.current || !radiusCircle.current) return;
+    if (!mapLoaded || !map.current) return;
 
-    // Update circle center and radius
-    radiusCircle.current.setData({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: center || [-122.4194, 37.7749],
-      },
-      properties: {},
-    });
+    const coordinates = center || [-122.4194, 37.7749];
+    
+    // Create a circle using turf
+    const options = { steps: 64, units: 'miles' as const };
+    const circleGeojson = circle(coordinates, radiusMiles, options);
 
-    map.current.setPaintProperty('radius-circle', 'circle-radius', {
-      stops: [
-        [0, 0],
-        [20, radiusMiles * 50], // Adjust the multiplier to make the circle more visible
-      ],
-    });
+    // Update the circle source
+    const source = map.current.getSource('radius-circle') as mapboxgl.GeoJSONSource;
+    source?.setData(circleGeojson);
 
-    // Center map on the location
+    // Center map on the location with appropriate zoom
     if (center) {
       map.current.flyTo({
         center: center,
