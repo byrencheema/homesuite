@@ -52,6 +52,7 @@ export default function Messages() {
         .from("messages")
         .select("*")
         .eq("home_id", selectedHome.id)
+        .eq("user_id", session.user.id)  // Filter messages by current user
         .order("created_at", { ascending: true });
 
       if (error) throw error;
