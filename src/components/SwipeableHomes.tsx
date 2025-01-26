@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Home } from "@/types/home";
 import { HomeCard } from "@/components/HomeCard";
 import { Button } from "@/components/ui/button";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Camera, CameraOff } from "lucide-react";
 import { MatchPopup } from "@/components/MatchPopup";
 
 interface SwipeableHomesProps {
@@ -259,7 +259,6 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
         >
           <HomeCard home={currentHome} />
         </div>
-        {/* Another HomeCard behind (for a 'stack' effect) */}
       </div>
 
       <div className="flex flex-col items-center gap-4">
@@ -282,9 +281,24 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
           </Button>
         </div>
 
-        {/* Toggle webcam on/off */}
-        <Button onClick={handleWebcamStart} className="mt-4">
-          {webcamOn ? "Stop Webcam" : "Start Webcam"}
+        {/* Enhanced webcam toggle button */}
+        <Button
+          onClick={handleWebcamStart}
+          variant="secondary"
+          size="lg"
+          className="mt-4 px-6 py-3 transition-all duration-300 hover:shadow-lg flex items-center gap-2 animate-fade-in"
+        >
+          {webcamOn ? (
+            <>
+              <CameraOff className="w-5 h-5 text-red-500" />
+              <span>Stop Gesture Control</span>
+            </>
+          ) : (
+            <>
+              <Camera className="w-5 h-5 text-primary" />
+              <span>Enable Gesture Control</span>
+            </>
+          )}
         </Button>
       </div>
 
