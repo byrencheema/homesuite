@@ -9,16 +9,17 @@ import { Button } from "@/components/ui/button";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { MatchPopup } from "@/components/MatchPopup";
 
-export function SwipeableHomes() {
+interface SwipeableHomesProps {
+  searchLocation?: string | null;
+  searchRadius?: number;
+}
+
+export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableHomesProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMatch, setShowMatch] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
-
-  // Track if webcam is on
   const [webcamOn, setWebcamOn] = useState(false);
-
-  // Keep refs for the video stream and intervals
   const videoStreamRef = useRef<MediaStream | null>(null);
   const httpIntervalRef = useRef<number | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
@@ -39,16 +40,40 @@ export function SwipeableHomes() {
     },
   });
 
-  // Fetch homes from Supabase
+  // Fetch homes from Supabase or use proximity search
   const { data: homes = [], isLoading } = useQuery({
-    queryKey: ["homes"],
+    queryKey: ["homes", searchLocation, searchRadius],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("homes")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as Home[];
+      if (searchLocation) {
+        // Use proximity search
+        const response = await fetch("https://kkgtnejqroqngtwecncs.functions.supabase.co/proximity-search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            location: searchLocation,
+            radius: searchRadius,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          toast.error(error.message || "Failed to search homes");
+          return [];
+        }
+
+        const { homes } = await response.json();
+        return homes;
+      } else {
+        // Regular fetch all homes
+        const { data, error } = await supabase
+          .from("homes")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data as Home[];
+      }
     },
   });
 
@@ -208,8 +233,13 @@ export function SwipeableHomes() {
   if (!currentHome) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold mb-4">No more homes to show!</h2>
-        <p className="text-muted-foreground">Check back later for new listings.</p>
+        <h2 className="text-2xl font-semibold mb-4">No homes found</h2>
+        <p className="text-muted-foreground">
+          {searchLocation 
+            ? `No homes found within ${searchRadius} miles of ${searchLocation}`
+            : "Check back later for new listings."
+          }
+        </p>
       </div>
     );
   }
