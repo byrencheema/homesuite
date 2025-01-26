@@ -1,13 +1,11 @@
 import { Hero } from "@/components/Hero";
-import { HowItWorks } from "@/components/HowItWorks";
-import { FeaturedListings } from "@/components/FeaturedListings";
+import { Navbar } from "@/components/Navbar";
 
 const Index = () => {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-background">
+      <Navbar />
       <Hero />
-      <HowItWorks />
-      <FeaturedListings />
     </main>
   );
 };
