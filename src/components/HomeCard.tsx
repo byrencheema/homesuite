@@ -15,12 +15,12 @@ interface HomeCardProps {
 
 export function HomeCard({ home }: HomeCardProps) {
   const hasMultipleImages = home.additional_image_urls && home.additional_image_urls.length > 0;
-  const allImages = [home.main_image_url, ...(home.additional_image_urls || [])];
+  const allImages = hasMultipleImages ? [home.main_image_url, ...home.additional_image_urls] : [home.main_image_url];
 
   return (
     <Card className="w-full max-w-md mx-auto overflow-hidden">
       <div className="relative aspect-[4/3]">
-        {hasMultipleImages ? (
+        {allImages.length > 1 ? (
           <Carousel className="w-full">
             <CarouselContent>
               {allImages.map((imageUrl, index) => (
