@@ -1,69 +1,84 @@
-# Welcome to your Lovable project
+# HomeSuite
 
-## Project info
+A modern real estate browsing application with gesture controls and location-based search.
 
-**URL**: https://lovable.dev/projects/229b7787-69ef-4e72-9df7-e2fc37025ef1
+## Production Setup Guide
 
-## How can I edit this code?
+### Prerequisites
 
-There are several ways of editing your application.
+- Node.js 16 or higher
+- Supabase account and project
+- Mapbox API key
+- Melissa API key for address validation
 
-**Use Lovable**
+### Environment Setup
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/229b7787-69ef-4e72-9df7-e2fc37025ef1) and start prompting.
+The application uses Supabase for secret management. Required secrets:
 
-Changes made via Lovable will be committed automatically to this repo.
+- OPENAI_API_KEY - For AI chat features
+- MELISSA_API_KEY - For address validation
+- MAPBOX_API_KEY - For geocoding and maps
 
-**Use your preferred IDE**
+These should be configured in your Supabase project's secret management.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Security Considerations
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Authentication**: 
+   - Email verification enabled by default
+   - JWT token-based session management
+   - Secure password requirements
 
-Follow these steps:
+2. **Database Security**:
+   - Row Level Security (RLS) policies enforced
+   - Input validation on all user inputs
+   - Prepared statements for database queries
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **API Security**:
+   - Rate limiting on API endpoints
+   - CORS configuration
+   - Input sanitization
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Error Handling
 
-# Step 3: Install the necessary dependencies.
-npm i
+The application implements:
+- Global error boundaries
+- Graceful degradation
+- Comprehensive error logging
+- User-friendly error messages
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### Performance Optimization
 
-**Edit a file directly in GitHub**
+1. **Frontend**:
+   - Code splitting
+   - Image optimization
+   - Lazy loading
+   - Caching strategies
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+2. **Backend**:
+   - Query optimization
+   - Connection pooling
+   - Edge function caching
 
-**Use GitHub Codespaces**
+### Monitoring
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Console logging for development
+- Error tracking
+- Performance monitoring
+- User analytics
 
-## What technologies are used for this project?
+### Deployment Checklist
 
-This project is built with .
+1. Configure all required secrets in Supabase
+2. Enable required authentication providers
+3. Verify RLS policies
+4. Test all error scenarios
+5. Monitor initial deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Development Workflow
 
-## How can I deploy this project?
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Configure Supabase project
+4. Start development server: `npm run dev`
 
-Simply open [Lovable](https://lovable.dev/projects/229b7787-69ef-4e72-9df7-e2fc37025ef1) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+For more details on specific features or configurations, refer to the documentation in the `docs` folder.
