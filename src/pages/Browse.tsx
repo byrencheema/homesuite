@@ -25,6 +25,13 @@ const Browse = () => {
     }
   };
 
+  const handleGestureControl = () => {
+    const webcamButton = document.querySelector('[data-webcam-button]') as HTMLButtonElement | null;
+    if (webcamButton) {
+      webcamButton.click();
+    }
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
@@ -94,7 +101,7 @@ const Browse = () => {
           <Button
             variant="secondary"
             className="fixed bottom-8 right-8 shadow-lg hover:shadow-xl transition-all duration-300 gap-2"
-            onClick={() => document.querySelector('[data-webcam-button]')?.click()}
+            onClick={handleGestureControl}
           >
             <Camera className="h-5 w-5" />
             <span>Gesture Control</span>
