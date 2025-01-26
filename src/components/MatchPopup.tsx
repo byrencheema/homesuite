@@ -13,7 +13,7 @@ export function MatchPopup({ isOpen, onClose, homeTitle }: MatchPopupProps) {
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 1000);
+      }, 500); // Reduced to 0.5 seconds
 
       return () => clearTimeout(timer);
     }

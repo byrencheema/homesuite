@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { RealtimeChat } from '@/utils/RealtimeAudio';
 import { Mic, MicOff } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface VoiceInterfaceProps {
   selectedHome: {
@@ -82,45 +82,75 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ selectedHome }) => {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center">
-      <motion.div
-        animate={{
-          scale: isSpeaking ? 1.2 : 1,
-          opacity: isSpeaking ? 0.8 : 1,
-        }}
-        transition={{ duration: 0.3 }}
-        className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-8 overflow-hidden"
-      >
-        {selectedHome ? (
-          <img 
-            src={selectedHome.main_image_url} 
-            alt="Home"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          isConnected ? (
-            <Mic className={`w-12 h-12 ${isSpeaking ? 'text-primary' : 'text-gray-400'}`} />
-          ) : (
-            <MicOff className="w-12 h-12 text-gray-400" />
-          )
-        )}
-      </motion.div>
+    <div className="flex-1 flex flex-col items-center justify-center relative">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={isConnected ? 'connected' : 'disconnected'}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center"
+        >
+          <motion.div
+            animate={{
+              scale: isSpeaking ? [1, 1.1, 1] : 1,
+              rotate: isSpeaking ? [-1, 1, -1] : 0,
+            }}
+            transition={{
+              duration: 2,
+              repeat: isSpeaking ? Infinity : 0,
+              ease: "easeInOut",
+            }}
+            className="w-48 h-48 rounded-full bg-primary/10 flex items-center justify-center mb-8 overflow-hidden relative"
+          >
+            {selectedHome ? (
+              <>
+                <img 
+                  src={selectedHome.main_image_url} 
+                  alt="Home"
+                  className="w-full h-full object-cover"
+                />
+                {isSpeaking && (
+                  <motion.div
+                    className="absolute bottom-0 left-0 w-full h-2 bg-primary/20"
+                    animate={{
+                      scaleY: [1, 2, 1],
+                    }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              isConnected ? (
+                <Mic className={`w-12 h-12 ${isSpeaking ? 'text-primary' : 'text-gray-400'}`} />
+              ) : (
+                <MicOff className="w-12 h-12 text-gray-400" />
+              )
+            )}
+          </motion.div>
 
-      {!isConnected ? (
-        <Button 
-          onClick={startConversation}
-          className="bg-primary hover:bg-primary/90 text-white"
-        >
-          Start Conversation
-        </Button>
-      ) : (
-        <Button 
-          onClick={endConversation}
-          variant="secondary"
-        >
-          End Conversation
-        </Button>
-      )}
+          {!isConnected ? (
+            <Button 
+              onClick={startConversation}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
+              Start Conversation
+            </Button>
+          ) : (
+            <Button 
+              onClick={endConversation}
+              variant="secondary"
+            >
+              End Conversation
+            </Button>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };

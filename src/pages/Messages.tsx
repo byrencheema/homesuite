@@ -151,12 +151,19 @@ export default function Messages() {
               <Tabs defaultValue="chat" className="flex-1 flex flex-col">
                 <ChatHeader home={selectedHome}>
                   <TabsList className="ml-4">
-                    <TabsTrigger value="chat">Chat</TabsTrigger>
-                    <TabsTrigger value="voice">Voice</TabsTrigger>
+                    <TabsTrigger value="chat" className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white">
+                      Chat
+                    </TabsTrigger>
+                    <TabsTrigger value="voice" className="transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-white">
+                      Voice
+                    </TabsTrigger>
                   </TabsList>
                 </ChatHeader>
 
-                <TabsContent value="chat" className="flex-1 flex flex-col">
+                <TabsContent 
+                  value="chat" 
+                  className="flex-1 flex flex-col data-[state=inactive]:opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
+                >
                   <ScrollArea className="flex-1 p-4">
                     {isLoadingMessages ? (
                       <div className="space-y-4">
@@ -192,7 +199,10 @@ export default function Messages() {
                   />
                 </TabsContent>
 
-                <TabsContent value="voice" className="flex-1">
+                <TabsContent 
+                  value="voice" 
+                  className="flex-1 data-[state=inactive]:opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
+                >
                   <VoiceInterface selectedHome={selectedHome} />
                 </TabsContent>
               </Tabs>
