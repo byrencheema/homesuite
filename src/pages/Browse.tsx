@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Filter, MapPin, Camera } from "lucide-react";
+import { Filter, MapPin } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -22,13 +22,6 @@ const Browse = () => {
   const handleSearch = () => {
     if (location.trim()) {
       setIsSearching(true);
-    }
-  };
-
-  const handleGestureControl = () => {
-    const webcamButton = document.querySelector('[data-webcam-button]') as HTMLButtonElement | null;
-    if (webcamButton) {
-      webcamButton.click();
     }
   };
 
@@ -96,16 +89,6 @@ const Browse = () => {
             searchLocation={isSearching ? location : null}
             searchRadius={radius[0]}
           />
-          
-          {/* Webcam Control Button */}
-          <Button
-            variant="secondary"
-            className="fixed bottom-8 right-8 shadow-lg hover:shadow-xl transition-all duration-300 gap-2"
-            onClick={handleGestureControl}
-          >
-            <Camera className="h-5 w-5" />
-            <span>Gesture Control</span>
-          </Button>
         </div>
       </div>
     </main>
