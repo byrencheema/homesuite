@@ -273,7 +273,7 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
                   <img
                     src={imageUrl}
                     alt={`${currentHome.title} - Image ${index + 1}`}
-                    className="object-cover w-full h-full"
+                    className="object-cover w-full h-full rounded-lg"
                   />
                 </CarouselItem>
               ))}
@@ -281,6 +281,23 @@ export function SwipeableHomes({ searchLocation, searchRadius = 10 }: SwipeableH
             <CarouselPrevious className="left-2" />
             <CarouselNext className="right-2" />
           </Carousel>
+
+          {/* Home details */}
+          <div className="mt-4 space-y-2">
+            <h2 className="text-2xl font-semibold">{currentHome.title}</h2>
+            <p className="text-muted-foreground">{currentHome.description}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-xl font-bold">${currentHome.price.toLocaleString()}</p>
+              <div className="flex gap-4 text-muted-foreground">
+                <span>{currentHome.bedrooms} beds</span>
+                <span>{currentHome.bathrooms} baths</span>
+                <span>{currentHome.square_feet.toLocaleString()} sqft</span>
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              {currentHome.address}, {currentHome.city}, {currentHome.state} {currentHome.zip_code}
+            </p>
+          </div>
         </div>
       </div>
 
