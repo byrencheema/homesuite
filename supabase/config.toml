@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.get-openai-token]
 verify_jwt = true
+
+[functions.proximity-search]
+verify_jwt = false
